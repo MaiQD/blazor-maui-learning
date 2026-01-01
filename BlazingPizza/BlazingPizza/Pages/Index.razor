@@ -1,0 +1,98 @@
+@page "/"
+@using BlazingPizza.Services
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject OrderState OrderState
+@inject IJSRuntime JavaScript
+<div class="main">
+	<ul class="pizza-cards">
+		@if (_pizzaSpecials is not null)
+		{
+			@foreach (var pizza in _pizzaSpecials)
+			{
+				<li @onclick="() => OrderState.ShowConfigurePizzaDialog(pizza)"
+				    style="background-image: url('@pizza.ImageUrl')">
+					<div class="pizza-info">
+						<span class="title">@pizza.Name</span>
+						@pizza.Description
+						<span class="price">@pizza.GetFormattedBasePrice()</span>
+					</div>
+				</li>
+			}
+		}
+	</ul>
+</div>
+@if (OrderState is not null && OrderState.ShowingConfigureDialog)
+{
+	<ConfigurePizzaDialog Pizza="OrderState.ConfiguringPizza" 
+	                      OnConfirm="OrderState.ConfirmConfigurePizzaDialog"
+	                      OnCancel="OrderState.CancelConfigurePizzaDialog"/>
+}
+<div class="sidebar">
+	@if (order.Pizzas.Any())
+	{
+		<div class="order-contents">
+			<h2>Your order</h2>
+
+			@foreach (var configuredPizza in order.Pizzas)
+			{
+				<div class="cart-item">
+					<div class="title">@(configuredPizza.Size)" @configuredPizza.Special.Name</div>
+					<div class="item-price">
+						@configuredPizza.GetFormattedTotalPrice()
+					</div>
+					<button type="button" class="close text-danger delete-item" aria-label="Close"
+					        @onclick="@(async () => await RemovePizzaConfirmation(configuredPizza))">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					@* <a @onclick="@(() => OrderState.RemoveConfiguredPizza(configuredPizza))" class="delete-item">x</a> *@
+				</div>
+			}
+		</div>
+	}
+	else
+	{
+		<div class="empty-cart">Choose a pizza<br>to get started</div>
+	}
+
+	<div class="order-total @(order.Pizzas.Any() ? "" : "hidden")">
+		Total:
+		<span class="total-price">@order.GetFormattedTotalPrice()</span>
+		<a href="checkout" class="@(OrderState.Order.Pizzas.Count == 0 ? "btn btn-warning disabled" : "btn btn-warning")">
+			Order >
+		</a>
+	</div>
+</div>
+@code
+{
+	List<PizzaSpecial> _pizzaSpecials = new();
+	Order order => OrderState.Order;
+	
+	protected override async Task OnInitializedAsync()
+	{
+		_pizzaSpecials = await HttpClient.GetFromJsonAsync<List<PizzaSpecial>>($"{NavigationManager.BaseUri}specials");
+	}
+
+	private async Task RemovePizzaConfirmation(Pizza removePizza)
+	{
+		var messageParams = new
+		{
+			title = "Remove Pizza?",
+			text = $"""Do you want to remove the "{removePizza.Special!.Name}" from your order?""",
+			icon = "warning",
+			buttons = new
+			{
+				abort = new { text = "No, leave it in my order", value = false },
+				confirm = new { text = "Yes, remove pizza", value = true }
+			},
+			dangerMode = true
+		};
+
+		// if(await JavaScript.InvokeAsync<bool>("confirm", $"Are you sure you want to remove the {(removePizza.Size)}\" {removePizza.Special.Name} pizza from your order?"))
+		
+		if (await JavaScript.InvokeAsync<bool>("swal", messageParams))
+		{
+			OrderState.RemoveConfiguredPizza(removePizza);
+		}
+	}
+}

@@ -1,0 +1,49 @@
+@page "/todo"
+@using Microsoft.AspNetCore.Http.Features
+@rendermode InteractiveServer
+
+<h3>Todo (@_todo.Count(p => !p.IsDone))</h3>
+<div class="row">
+    <input @bind="_newTodo" class="form-control col-10 mb-2"/>
+    <button @onclick="AddTodo" class="btn btn-primary col-1">Add</button>
+</div>
+<table class="table mt-2">
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in _todo)
+    {
+        <tr>
+            <td><input class="form-control" @bind="@item.Title"/></td>
+            <td>
+                <input class="form-check" type="checkbox" @bind="@item.IsDone"/>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+@* <ul> *@
+@*     @foreach(var item in _todo) *@
+@*     { *@
+@*         <li>@item.Title</li> *@
+@*     } *@
+@* </ul> *@
+
+@code {
+    private List<TodoItem> _todo = [];
+    private string _newTodo = string.Empty;
+
+    private void AddTodo()
+    {
+        if (!string.IsNullOrWhiteSpace(_newTodo))
+        {
+            _todo.Add(new TodoItem { Title = _newTodo });
+            _newTodo = string.Empty;
+        }
+    }
+
+}

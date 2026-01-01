@@ -1,0 +1,68 @@
+@page "/pizzas"
+@rendermode RenderMode.InteractiveServer
+@using BlazingPizza.Data
+@using Pizza = BlazingPizza.Data.Pizza
+
+@inject PizzaService PizzaService
+
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4 mb-3">Choose your pizza</h1>
+            <p class="lead">We have all these delicious recipes:</p>
+        </div>
+    </div>
+
+    @if (pizzas == null)
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    <p>We're finding out what pizzas are available today...</p>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Pizza Name</th>
+                            <th>Description</th>
+                            <th>Vegetarian?</th>
+                            <th>Vegan?</th>
+                            <th>Price</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var pizza in pizzas)
+                        {
+                            <tr>
+                                <td>@pizza.Name</td>
+                                <td>@pizza.Description</td>
+                                <td>@pizza.Vegetarian</td>
+                                <td>@pizza.Vegan</td>
+                                <td>@pizza.Price</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private Pizza[] pizzas = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        pizzas = await PizzaService.GetPizzasAsync();
+    }
+
+}
