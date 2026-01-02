@@ -1,15 +1,6 @@
-@using System.Drawing
+@using ConnectFour.Services
 @inject GameState State
-<HeadContent>
-    <style>
-        :root {
-            --board-bg: @ColorTranslator.ToHtml(BoardColor);
-            --player1: @ColorTranslator.ToHtml(Player1Color);
-            --player2: @ColorTranslator.ToHtml(Player2Color);
-        }
-    </style>
-</HeadContent>
-<div>
+<div style="--board-bg: @BoardColor; --player1: @Player1Color; --player2: @Player2Color;">
     <nav>
         @for (byte i = 0; i < 7; i++)
         {
@@ -48,11 +39,11 @@
     private string CurrentTurn => (winnerMessage == string.Empty) ? $"Player {State.PlayerTurn}'s Turn" : "";
     private string ResetStyle => (winnerMessage == string.Empty) ? "display: none;" : "";
 
-    [Parameter] public Color BoardColor { get; set; } = ColorTranslator.FromHtml("yellow");
+    [Parameter] public string BoardColor { get; set; } = "yellow";
 
-    [Parameter] public Color Player1Color { get; set; } = ColorTranslator.FromHtml("red");
+    [Parameter] public string Player1Color { get; set; } = "red";
 
-    [Parameter] public Color Player2Color { get; set; } = ColorTranslator.FromHtml("blue");
+    [Parameter] public string Player2Color { get; set; } = "blue";
 
     protected override void OnInitialized()
     {
