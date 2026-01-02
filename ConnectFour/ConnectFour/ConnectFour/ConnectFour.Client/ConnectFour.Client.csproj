@@ -17,4 +17,8 @@
       <Folder Include="Pages\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\ConnectFour.Shared\ConnectFour.Shared.csproj" />
+    </ItemGroup>
+
 </Project>
